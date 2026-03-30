@@ -4,7 +4,7 @@ worker.py - OCRWorker QThread
 
 import logging
 import traceback
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 
 log = logging.getLogger("worker")
 
@@ -35,7 +35,7 @@ class OCRWorker(QThread):
             log.debug("finished signal emitted OK")
 
         except ImportError as e:
-            msg = f"Missing dependency: {e}\n\nRun:  pip install winsdk Pillow pyqt5"
+            msg = f"Missing dependency: {e}\n\nRun:  pip install winsdk Pillow pyqt6"
             log.error(msg)
             self.error.emit(msg)
 

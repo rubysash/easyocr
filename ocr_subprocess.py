@@ -31,6 +31,9 @@ def main():
             return
 
         try:
+            import warnings
+            warnings.filterwarnings("ignore", message=".*pin_memory.*")
+
             # gpu=False keeps it CPU-only and avoids CUDA/DLL conflicts.
             # verbose=False suppresses model-download progress spam on stdout.
             reader = easyocr.Reader(["en"], gpu=False, verbose=False)

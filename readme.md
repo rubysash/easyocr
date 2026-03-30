@@ -1,6 +1,6 @@
 # Local OCR Tool
 
-A fully **offline, local OCR tool** built with EasyOCR and PyQt5. Images are processed entirely on your machine — **nothing is uploaded to any cloud service.**
+A fully **offline, local OCR tool** built with EasyOCR and PyQt6. Images are processed entirely on your machine — **nothing is uploaded to any cloud service.**
 
 ---
 
@@ -9,7 +9,7 @@ A fully **offline, local OCR tool** built with EasyOCR and PyQt5. Images are pro
 The app uses a layered subprocess architecture to prevent native DLL conflicts (common with PyTorch/CUDA on Windows) from crashing the UI:
 
 ```
-main.py  (PyQt5 UI)
+main.py  (PyQt6 UI)
   └── OCRWorker  (QThread — worker.py)
         └── ocr_backend.py  (sanitizes env, spawns subprocess)
               └── ocr_subprocess.py  (isolated child process — runs EasyOCR)
@@ -31,6 +31,8 @@ main.py  (PyQt5 UI)
 
 ## Installation
 
+> **Install order matters.** PyTorch and torchvision ship CPU-only wheels through their own download index — they are **not on PyPI**. You must install them first with the `--index-url` flag before running `pip install -r requirements.txt`, or pip will fail trying to find the `+cpu` tagged versions.
+
 ### 1. Create and activate a virtual environment
 
 ```bat
@@ -38,18 +40,35 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-### 2. Run the installer
+### 2. Install dependencies
+
+#### Option A — Automated (Windows)
 
 ```bat
 install.bat
 ```
 
-The installer:
-- Verifies a virtual environment is active (exits with an error if not)
-- Installs PyTorch and torchvision from the official **CPU-only** wheel index
-- Installs all remaining dependencies from `requirements.txt`
+#### Option B — Manual
 
-> **Why CPU-only?** The app explicitly disables GPU (`gpu=False`) to avoid CUDA DLL conflicts. A GPU build of PyTorch is not needed and would only cause problems.
+**Step 1: Install PyTorch + torchvision (CPU-only) from the PyTorch wheel index**
+
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+```
+
+This installs the CPU-only builds (`torch==2.10.0+cpu`, `torchvision==0.25.0+cpu`). These wheels are hosted by PyTorch, not PyPI, so the `--index-url` flag is required.
+
+**Step 2: Install all remaining dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+Since torch and torchvision are already installed from Step 1, pip will skip them and install everything else from PyPI normally.
+
+> **Why CPU-only?** The app explicitly disables GPU (`gpu=False`) to avoid CUDA DLL conflicts on Windows. A GPU build of PyTorch is not needed and would only cause problems.
+>
+> **Why two steps?** The `+cpu` suffix on the torch/torchvision versions in `requirements.txt` tells pip to match the exact CPU-only wheel. PyPI doesn't carry these builds — only PyTorch's own index does. Running `pip install -r requirements.txt` alone will fail with a version-not-found error for those two packages.
 
 ---
 
@@ -67,7 +86,8 @@ python main.py
 |---|---|
 | `easyocr` | OCR engine (runs locally, CPU-only) |
 | `torch` + `torchvision` | EasyOCR backend (CPU wheel) |
-| `PyQt5` | Desktop UI and threading |
+| `PyQt6` | Desktop UI and threading |
+| `qt-material` | Dark Material Design theme |
 | `opencv-python-headless` | Image preprocessing |
 | `Pillow` | Image loading |
 
@@ -95,6 +115,7 @@ All processing happens **on your local machine**:
 
 ## Features
 
+- **Dark Material Design UI** — modern dark theme with teal accents via qt-material
 - **Zero setup OCR** — uses the Windows built-in OCR engine (no ML models to download)
 - **Live image preview** — see the loaded image alongside the output
 - **Editable output textarea** — review, manually correct, or annotate the extracted text
@@ -110,8 +131,8 @@ All processing happens **on your local machine**:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  [Open Image]  [Run OCR]  [Clear]    [Copy All]         │
-│                                   Engine: Windows.Media.Ocr │
+│  [Open Image] [Paste Image] [Run OCR] [Clear] [Copy All] │
+│                                        Engine: EasyOCR      │
 ├──────────────────────┬──────────────────────────────────┤
 │                      │  OCR Output          1,234 chars │
 │   Image Preview      │ ┌──────────────────────────────┐ │

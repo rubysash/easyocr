@@ -13,9 +13,10 @@ opencv-python-headless==4.13.0.92
 packaging==26.0
 pillow==12.1.1
 pyclipper==1.4.0
-PyQt5==5.15.11
-PyQt5-Qt5==5.15.2
-PyQt5_sip==12.18.0
+PyQt6==6.10.2
+PyQt6-Qt6==6.10.2
+PyQt6_sip==13.11.1
+qt-material==2.17
 python-bidi==0.6.7
 PyYAML==6.0.3
 scikit-image==0.26.0

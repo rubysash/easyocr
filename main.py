@@ -8,11 +8,13 @@ import sys
 import logging
 import traceback
 from pathlib import Path
+from config import DEBUG
 
 # ── Logging setup (file + stdout) ─────────────────────────────────────────────
 log_path = Path(__file__).parent / "ocr_debug.log"
+log_level = logging.DEBUG if DEBUG else logging.WARNING
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=log_level,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
         logging.FileHandler(log_path, mode="w", encoding="utf-8"),
@@ -27,10 +29,11 @@ log.info(f"Platform: {sys.platform}")
 # ── Qt import ─────────────────────────────────────────────────────────────────
 log.info("Importing PyQt5...")
 try:
-    from PyQt5.QtWidgets import QApplication
-    log.info("PyQt5 imported OK")
+    from PyQt6.QtWidgets import QApplication
+    from qt_material import apply_stylesheet
+    log.info("PyQt5 + qt_material imported OK")
 except Exception:
-    log.critical("PyQt5 import FAILED:\n" + traceback.format_exc())
+    log.critical("PyQt5 / qt_material import FAILED:\n" + traceback.format_exc())
     sys.exit(1)
 
 # ── winsdk import check ───────────────────────────────────────────────────────
@@ -45,8 +48,9 @@ except Exception:
 def main():
     log.info("Creating QApplication...")
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
-    log.info("QApplication created OK")
+
+    apply_stylesheet(app, theme="dark_teal.xml")
+    log.info("QApplication created OK — dark teal theme applied")
 
     log.info("Importing MainWindow from gui...")
     try:
@@ -68,7 +72,7 @@ def main():
     win.show()
     log.info("Window shown — entering event loop")
 
-    code = app.exec_()
+    code = app.exec()
     log.info(f"Event loop exited with code {code}")
     # Do not call sys.exit() — let the process end naturally so logs flush
 
